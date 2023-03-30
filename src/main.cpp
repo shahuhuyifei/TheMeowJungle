@@ -1,7 +1,7 @@
 #include "main.h"
 
 player this_player;
-
+gameBoard boardPlaying;
 // Convert uid to a string
 String uidToString()
 {
@@ -16,12 +16,47 @@ String uidToString()
   return outputStringUid;
 }
 
-// Identify the player
+// Identify the player and initialize the game board at player A
 void identifyPlayer(String playerIdentifier)
 {
   if (playerIdentifier = "A")
   {
     this_player = player_A;
+    int initialLevel[NUM_SPOTS];
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      initialLevel[i] = random(1, ALL_LEVELS + 1);
+    }
+    int initialFood[NUM_SPOTS];
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      initialFood[i] = random(FOOD_TYPE);
+    }
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      initialFoodAmount[initialFood[i]] -= 1;
+    }
+    boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0);
+    //////
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      Serial.print(boardPlaying.level[i]);
+      Serial.print(" ");
+    }
+    Serial.println();
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      Serial.print(boardPlaying.food[i]);
+      Serial.print(" ");
+    }
+    Serial.println();
+    for (int i = 0; i < NUM_SPOTS; i++)
+    {
+      Serial.print(boardPlaying.totalFoodAmount[i]);
+      Serial.print(" ");
+    }
+    Serial.println();
+    //////
   }
   else if (playerIdentifier = "B")
   {
@@ -61,6 +96,7 @@ void loop()
   {
     return;
   }
+
   // Detect
   Serial.println(uidToString());
   if (uidToString() == this_player.detect_uid)
