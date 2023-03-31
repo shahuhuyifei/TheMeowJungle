@@ -1,7 +1,8 @@
 #include "main.h"
 
-player this_player;
-gameBoard boardPlaying;
+player this_player;     // Store the current player's information
+gameBoard boardPlaying; // Store the current gameboard information
+
 // Convert uid to a string
 String uidToString()
 {
@@ -16,47 +17,55 @@ String uidToString()
   return outputStringUid;
 }
 
-// Identify the player and initialize the game board at player A
+void printGameBoard()
+{
+  for (int i = 0; i < NUM_SPOTS; i++)
+  {
+    Serial.print(boardPlaying.level[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  for (int i = 0; i < NUM_SPOTS; i++)
+  {
+    Serial.print(boardPlaying.food[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  for (int i = 0; i < NUM_SPOTS; i++)
+  {
+    Serial.print(boardPlaying.totalFoodAmount[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  Serial.println(boardPlaying.myTurn);
+  Serial.println(boardPlaying.endGame);
+}
+
+// Identify the player and initialize the gameboard at player A
 void identifyPlayer(String playerIdentifier)
 {
   if (playerIdentifier = "A")
   {
     this_player = player_A;
+    // Generate initial levels
     int initialLevel[NUM_SPOTS];
     for (int i = 0; i < NUM_SPOTS; i++)
     {
       initialLevel[i] = random(1, ALL_LEVELS + 1);
     }
+    // Generate initial food types
     int initialFood[NUM_SPOTS];
     for (int i = 0; i < NUM_SPOTS; i++)
     {
       initialFood[i] = random(FOOD_TYPE);
     }
+    // Adjust total amount of each type of food
     for (int i = 0; i < NUM_SPOTS; i++)
     {
       initialFoodAmount[initialFood[i]] -= 1;
     }
+    // Initialise the gameboard
     boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0);
-    //////
-    for (int i = 0; i < NUM_SPOTS; i++)
-    {
-      Serial.print(boardPlaying.level[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
-    for (int i = 0; i < NUM_SPOTS; i++)
-    {
-      Serial.print(boardPlaying.food[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
-    for (int i = 0; i < NUM_SPOTS; i++)
-    {
-      Serial.print(boardPlaying.totalFoodAmount[i]);
-      Serial.print(" ");
-    }
-    Serial.println();
-    //////
   }
   else if (playerIdentifier = "B")
   {
@@ -81,6 +90,16 @@ void setup()
   mfrc522.PCD_DumpVersionToSerial(); // Show details of PCD - MFRC522 Card Reader details
 
   identifyPlayer(CURRENT_PLAYER); // Identify the player. Can be A, B or C.
+
+  // Init ESPNow communication between two boards
+  WiFi.mode(WIFI_MODE_STA);
+  Serial.println(WiFi.macAddress());
+  WiFi.disconnect();
+  ESPNow.init();
+  ESPNow.add_peer(this_player.peer_mac);
+  // ESPNow.reg_recv_cb(onRecv);
+
+  printGameBoard();
 }
 
 void loop()
@@ -104,6 +123,7 @@ void loop()
     while (true)
     {
       // Look for new cards
+      String detectingSpot;
       if (!mfrc522.PICC_IsNewCardPresent())
       {
         continue;
@@ -112,6 +132,14 @@ void loop()
       if (!mfrc522.PICC_ReadCardSerial())
       {
         continue;
+      }
+      detectingSpot = uidToString();
+      for (int i = 0; i < NUM_SPOTS; i++)
+      {
+        if (detectingSpot == this_player.board[i])
+        {
+          Serial.println(boardPlaying.level[i]);
+        }
       }
     }
   }
