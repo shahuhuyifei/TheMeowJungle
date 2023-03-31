@@ -64,7 +64,6 @@ void identifyPlayer(String playerIdentifier)
     {
       initialFoodAmount[initialFood[i]] -= 1;
     }
-    // Initialise the gameboard
     boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0);
   }
   else if (playerIdentifier = "B")
@@ -104,26 +103,13 @@ void setup()
 
 void loop()
 {
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if (!mfrc522.PICC_IsNewCardPresent())
+  if (boardPlaying.myTurn == 1)
   {
-    return;
-  }
-
-  // Select one of the cards
-  if (!mfrc522.PICC_ReadCardSerial())
-  {
-    return;
-  }
-
-  // Detect
-  Serial.println(uidToString());
-  if (uidToString() == this_player.detect_uid)
-  {
-    while (true)
+    String action;
+    while (action == NULL)
     {
+      String cardRead;
       // Look for new cards
-      String detectingSpot;
       if (!mfrc522.PICC_IsNewCardPresent())
       {
         continue;
@@ -133,12 +119,36 @@ void loop()
       {
         continue;
       }
-      detectingSpot = uidToString();
-      for (int i = 0; i < NUM_SPOTS; i++)
+      cardRead = uidToString();
+      if (cardRead == this_player.detect_uid || cardRead == this_player.dig_uid || cardRead == this_player.collect_uid)
       {
-        if (detectingSpot == this_player.board[i])
+        action = cardRead;
+      }
+    }
+    Serial.println(action);
+    // Detect
+    if (uidToString() == this_player.detect_uid)
+    {
+      while (true)
+      {
+        // Look for new cards
+        String detectingSpot;
+        if (!mfrc522.PICC_IsNewCardPresent())
         {
-          Serial.println(boardPlaying.level[i]);
+          continue;
+        }
+        // Select one of the cards
+        if (!mfrc522.PICC_ReadCardSerial())
+        {
+          continue;
+        }
+        detectingSpot = uidToString();
+        for (int i = 0; i < NUM_SPOTS; i++)
+        {
+          if (detectingSpot == this_player.board[i])
+          {
+            Serial.println(boardPlaying.level[i]);
+          }
         }
       }
     }

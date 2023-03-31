@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <Arduino.h>
+#include <Wire.h>
 #include <SPI.h>
 #include <MFRC522.h>
 #include <WiFi.h>
@@ -34,8 +35,8 @@ struct player
   int cucumber;                    // Store the number of cucumbers a player owns
   int digAmount;                   // Amount of digging actions left
   int chanceToKnowType[FOOD_TYPE]; // The chance to know the food type by rolling a digital dice after detect
-  uint8_t *my_mac;                 // mac address of the current player
-  uint8_t *peer_mac;               // mac address of the next player
+  uint8_t my_mac[6];               // mac address of the current player
+  uint8_t peer_mac[6];             // mac address of the next player
 };
 
 // Create a struct for the game board information to share between players
@@ -64,11 +65,6 @@ struct gameBoard
   }
 };
 
-// Store MAC addresses
-uint8_t player_A_mac[] = {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0};
-uint8_t player_B_mac[] = {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C};
-uint8_t player_C_mac[] = {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48};
-
 // Create initial properties for each player
 player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", "D3 AF 51 42", "23 1E 52 42", "73 87 52 42", "93 EB 52 42", "93 F0 52 42"},
                    "00 7B 29 4A",
@@ -81,8 +77,8 @@ player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", 
                    0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
-                   player_A_mac,
-                   player_B_mac};
+                   {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0},
+                   {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C}};
 
 player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", "53 58 53 42", "93 D2 53 42", "B3 31 59 42", "63 B2 58 42", "43 32 58 42"},
                    "F0 79 29 4A",
@@ -95,8 +91,8 @@ player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", 
                    0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
-                   player_B_mac,
-                   player_C_mac};
+                   {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C},
+                   {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48}};
 
 player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", "A3 BC 55 42", "A3 C2 55 42", "C3 35 56 42", "93 B3 56 42", "93 B9 56 42"},
                    "40 7A 29 4A",
@@ -109,8 +105,8 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
                    0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
-                   player_C_mac,
-                   player_A_mac};
+                   {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48},
+                   {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0}};
 
 /*
   Code and amount for food treasures
