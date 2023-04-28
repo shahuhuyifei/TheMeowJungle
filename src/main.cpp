@@ -98,6 +98,8 @@ void setup()
   ESPNow.add_peer(this_player.peer_mac);
   // ESPNow.reg_recv_cb(onRecv);
 
+  matrix.begin(0x70);
+
   printGameBoard();
 }
 
@@ -127,7 +129,7 @@ void loop()
     }
     Serial.println(action);
     // Detect
-    if (uidToString() == this_player.detect_uid)
+    if (action == this_player.detect_uid)
     {
       while (true)
       {

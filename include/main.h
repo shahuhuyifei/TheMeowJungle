@@ -7,6 +7,8 @@
 #include <MFRC522.h>
 #include <WiFi.h>
 #include "ESPNowW.h"
+#include <Adafruit_GFX.h>
+#include "Adafruit_LEDBackpack.h"
 
 // Define pins for RFID reader
 #define RST_PIN 25
@@ -14,6 +16,9 @@
 
 // Declaration of the RFID reader
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+// Declaration of the LED matrix
+Adafruit_BicolorMatrix matrix = Adafruit_BicolorMatrix();
 
 #define NUM_SPOTS 9        // Total number of food spots on the map
 #define MAX_DIG 15         // Maximum number of digging action a player can perform
