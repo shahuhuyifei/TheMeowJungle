@@ -29,14 +29,15 @@ Adafruit_BicolorMatrix matrix = Adafruit_BicolorMatrix();
 // Create a struct for all players to store their information
 struct player
 {
-  String board[NUM_SPOTS];         // uid for food spots
-  String detect_uid;               // uid for Detect Action Card
-  String dig_uid;                  // uid for the Dig Action Cad
-  String collect_uid;              // uid for Collecting Digging Strength Card
-  String player_A_uid;             // uid for the card repersenting player A
-  String player_B_uid;             // uid for the card repersenting player B
-  String player_C_uid;             // uid for the card repersenting player C
-  int myFood[MAX_DIG];             // Store the food that a player owns
+  String board[NUM_SPOTS]; // uid for food spots
+  String detect_uid;       // uid for Detect Action Card
+  String dig_uid;          // uid for the Dig Action Cad
+  String collect_uid;      // uid for Collecting Digging Strength Card
+  String player_A_uid;     // uid for the card repersenting player A
+  String player_B_uid;     // uid for the card repersenting player B
+  String player_C_uid;     // uid for the card repersenting player C
+  int myFood[MAX_DIG];     // Store the food that a player owns
+  int digStrength;
   int cucumber;                    // Store the number of cucumbers a player owns
   int digAmount;                   // Amount of digging actions left
   int chanceToKnowType[FOOD_TYPE]; // The chance to know the food type by rolling a digital dice after detect
@@ -80,6 +81,7 @@ player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", 
                    "40 7B 29 4A",
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
+                   0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0},
@@ -94,6 +96,7 @@ player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", 
                    "30 7A 29 4A",
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
+                   0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C},
@@ -107,6 +110,7 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
                    "80 7A 29 4A",
                    "",
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+                   0,
                    0,
                    MAX_DIG,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -129,5 +133,34 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
   ------------------------------------------------
 */
 int initialFoodAmount[FOOD_TYPE] = {3, 5, 6, 6, 6, 7, 7, 8, 6};
+
+static const uint8_t PROGMEM
+    smile_bmp[] =
+        {B00111100,
+         B01000010,
+         B10100101,
+         B10000001,
+         B10100101,
+         B10011001,
+         B01000010,
+         B00111100},
+    neutral_bmp[] =
+        {B00111100,
+         B01000010,
+         B10100101,
+         B10000001,
+         B10111101,
+         B10000001,
+         B01000010,
+         B00111100},
+    frown_bmp[] =
+        {B00111100,
+         B01000010,
+         B10100101,
+         B10000001,
+         B10011001,
+         B10100101,
+         B01000010,
+         B00111100};
 
 #endif

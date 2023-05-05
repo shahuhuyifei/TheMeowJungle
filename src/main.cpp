@@ -17,27 +17,33 @@ String uidToString()
   return outputStringUid;
 }
 
+// Print the gameboard information for debugging
 void printGameBoard()
 {
+  Serial.print("Levels: ");
   for (int i = 0; i < NUM_SPOTS; i++)
   {
     Serial.print(boardPlaying.level[i]);
     Serial.print(" ");
   }
   Serial.println();
+  Serial.print("Foods: ");
   for (int i = 0; i < NUM_SPOTS; i++)
   {
     Serial.print(boardPlaying.food[i]);
     Serial.print(" ");
   }
   Serial.println();
+  Serial.print("Total Food Amount: ");
   for (int i = 0; i < NUM_SPOTS; i++)
   {
     Serial.print(boardPlaying.totalFoodAmount[i]);
     Serial.print(" ");
   }
   Serial.println();
+  Serial.print("Myturn: ");
   Serial.println(boardPlaying.myTurn);
+  Serial.print("endGame: ");
   Serial.println(boardPlaying.endGame);
 }
 
@@ -53,17 +59,23 @@ void identifyPlayer(String playerIdentifier)
     {
       initialLevel[i] = random(1, ALL_LEVELS + 1);
     }
-    // Generate initial food types
+    // Generate initial food types and adjust total amount of each type of food
     int initialFood[NUM_SPOTS];
     for (int i = 0; i < NUM_SPOTS; i++)
     {
-      initialFood[i] = random(FOOD_TYPE);
+      bool fillFood = true;
+      while (fillFood)
+      {
+        int tempFood = random(FOOD_TYPE);
+        if (initialFoodAmount[tempFood] > 0)
+        {
+          initialFood[i] = tempFood;
+          initialFoodAmount[initialFood[i]] -= 1;
+          fillFood = false;
+        }
+      }
     }
-    // Adjust total amount of each type of food
-    for (int i = 0; i < NUM_SPOTS; i++)
-    {
-      initialFoodAmount[initialFood[i]] -= 1;
-    }
+    // Initialize the board
     boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0);
   }
   else if (playerIdentifier = "B")
@@ -77,6 +89,73 @@ void identifyPlayer(String playerIdentifier)
   else
   {
     Serial.println("Unknown player");
+  }
+}
+
+// Draw single digit on the LED Matrix with an input color
+void drawDigit(int digit, uint16_t color)
+{
+  matrix.setTextSize(1);
+  matrix.setTextColor(color);
+  matrix.clear();
+  matrix.setCursor(1, 1);
+  matrix.print(digit);
+  matrix.writeDisplay();
+}
+
+// Draw words on the LED Matrix with an input color
+void drawWord(String word, uint16_t color)
+{
+  matrix.setTextWrap(false);
+  matrix.setTextSize(1);
+  matrix.setTextColor(color);
+  for (int8_t x = 7; x >= -36; x--)
+  {
+    matrix.clear();
+    matrix.setCursor(x, 0);
+    matrix.print(word);
+    matrix.writeDisplay();
+    delay(50);
+  }
+}
+
+// Draw a smile face to indicate successful action
+void drawSmileFace()
+{
+  matrix.clear();
+  matrix.drawBitmap(0, 0, smile_bmp, 8, 8, LED_GREEN);
+  matrix.writeDisplay();
+  delay(1000);
+}
+
+// Draw a sad face to indicate unsuccessful action
+void drawSadFace()
+{
+  matrix.clear();
+  matrix.drawBitmap(0, 0, frown_bmp, 8, 8, LED_RED);
+  matrix.writeDisplay();
+  delay(1000);
+}
+
+void drawProgressBar()
+{
+  for (int y = 7; y <= 0; y--)
+  {
+    matrix.drawPixel(y, 0, LED_RED);
+    matrix.writeDisplay();
+    delay(200);
+  }
+  for (int x = 1; x <= 7; x++)
+  {
+    matrix.drawPixel(0, x, LED_RED);
+    matrix.writeDisplay();
+    delay(200);
+  }
+  for (int y = 1; y <= 7; y++)
+  {
+    matrix.drawPixel(y, 7, LED_RED);
+    matrix.writeDisplay();
+    delay(200);
   }
 }
 
@@ -105,9 +184,13 @@ void setup()
 
 void loop()
 {
+  drawDigit(this_player.digStrength, LED_YELLOW);
+
+  // Start this player's turn
   if (boardPlaying.myTurn == 1)
   {
     String action;
+    // Choose an action
     while (action == NULL)
     {
       String cardRead;
@@ -127,10 +210,63 @@ void loop()
         action = cardRead;
       }
     }
-    Serial.println(action);
     // Detect
     if (action == this_player.detect_uid)
     {
+      drawWord("Detect", LED_GREEN);
+      bool stopDetect = true;
+      while (stopDetect)
+      {
+        String detectingSpot;
+        if (!mfrc522.PICC_IsNewCardPresent())
+        {
+          continue;
+        }
+        if (!mfrc522.PICC_ReadCardSerial())
+        {
+          continue;
+        }
+        detectingSpot = uidToString();
+        for (int i = 0; i < NUM_SPOTS; i++)
+        {
+          if (detectingSpot == this_player.board[i])
+          {
+            drawDigit(boardPlaying.level[i], LED_GREEN);
+            Serial.println(boardPlaying.level[i]);
+            drawProgressBar();
+            stopDetect = false;
+            boardPlaying.myTurn = 0;
+          }
+        }
+      }
+    }
+    // Collect digging Strength
+    else if (action == this_player.collect_uid)
+    {
+      if (this_player.digStrength < 3)
+      {
+        this_player.digStrength += 1;
+        drawSmileFace();
+        boardPlaying.myTurn = 0;
+      }
+      else
+      {
+        drawSadFace();
+      }
+    }
+    else if (action == this_player.dig_uid)
+    {
+      matrix.setTextWrap(false);
+      matrix.setTextSize(1);
+      matrix.setTextColor(LED_GREEN);
+      for (int8_t x = 7; x >= -36; x--)
+      {
+        matrix.clear();
+        matrix.setCursor(x, 0);
+        matrix.print("Dig");
+        matrix.writeDisplay();
+        delay(100);
+      }
       while (true)
       {
         // Look for new cards
@@ -149,7 +285,11 @@ void loop()
         {
           if (detectingSpot == this_player.board[i])
           {
-            Serial.println(boardPlaying.level[i]);
+            matrix.clear();
+            matrix.drawLine(0, 0, 7, 7, LED_RED);
+            matrix.drawLine(0, 7, 7, 0, LED_RED);
+            matrix.writeDisplay();
+            delay(500);
           }
         }
       }
