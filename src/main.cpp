@@ -103,6 +103,20 @@ void drawDigit(int digit, uint16_t color)
   matrix.writeDisplay();
 }
 
+// Draw single digit on the LED Matrix with an input color
+void drawDigitWithBlink(int digit, uint16_t color)
+{
+  matrix.setTextSize(1);
+  matrix.setTextColor(color);
+  matrix.blinkRate(1);
+  matrix.clear();
+  matrix.setCursor(1, 1);
+  matrix.print(digit);
+  matrix.writeDisplay();
+  delay(2000);
+  matrix.blinkRate(0);
+}
+
 // Draw words on the LED Matrix with an input color
 void drawWord(String word, uint16_t color)
 {
@@ -137,25 +151,45 @@ void drawSadFace()
   delay(1000);
 }
 
-void drawProgressBar()
+void drawProgressBar(int num)
 {
-  for (int y = 7; y <= 0; y--)
+  for (int x = 7; x >= 0; x--)
   {
-    matrix.drawPixel(y, 0, LED_RED);
-    matrix.writeDisplay();
-    delay(200);
-  }
-  for (int x = 1; x <= 7; x++)
-  {
-    matrix.drawPixel(0, x, LED_RED);
-    matrix.writeDisplay();
-    delay(200);
-  }
-  for (int y = 1; y <= 7; y++)
-  {
-    matrix.drawPixel(y, 7, LED_RED);
-    matrix.writeDisplay();
-    delay(200);
+    if (x > 4)
+    {
+      matrix.clear();
+      matrix.drawLine(0, 0, x, 0, LED_GREEN);
+      matrix.setTextSize(1);
+      matrix.setTextColor(LED_GREEN);
+      matrix.setCursor(1, 1);
+      matrix.print(num);
+      matrix.writeDisplay();
+      delay(500);
+    }
+    else if (x > 1)
+    {
+      matrix.clear();
+      matrix.drawLine(0, 0, x, 0, LED_YELLOW);
+      matrix.setTextSize(1);
+      matrix.setTextColor(LED_GREEN);
+      matrix.setCursor(1, 1);
+      matrix.print(num);
+      matrix.writeDisplay();
+      matrix.writeDisplay();
+      delay(500);
+    }
+    else
+    {
+      matrix.clear();
+      matrix.drawLine(0, 0, x, 0, LED_RED);
+      matrix.setTextSize(1);
+      matrix.setTextColor(LED_GREEN);
+      matrix.setCursor(1, 1);
+      matrix.print(num);
+      matrix.writeDisplay();
+      matrix.writeDisplay();
+      delay(500);
+    }
   }
 }
 
@@ -231,9 +265,24 @@ void loop()
         {
           if (detectingSpot == this_player.board[i])
           {
-            drawDigit(boardPlaying.level[i], LED_GREEN);
+            drawProgressBar(boardPlaying.level[i]);
             Serial.println(boardPlaying.level[i]);
-            drawProgressBar();
+            // Roll a 6 sided dice to have the chance to know food type
+            for (int i = 0; i < 30; i++)
+            {
+              drawDigit(random(1, 7), LED_RED);
+              delay(60);
+            }
+            int chance = random(1, 7);
+            // Display the result of rolling and print the food when success
+            if (chance <= this_player.chanceToKnowType[boardPlaying.level[i]])
+            {
+              drawDigitWithBlink(chance, LED_GREEN);
+            }
+            else
+            {
+              drawDigitWithBlink(chance, LED_RED);
+            }
             stopDetect = false;
             boardPlaying.myTurn = 0;
           }
