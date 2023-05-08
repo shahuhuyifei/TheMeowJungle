@@ -17,6 +17,33 @@ String uidToString()
   return outputStringUid;
 }
 
+// Print the player information for debugging
+void printPlayer()
+{
+  Serial.print("myFood: ");
+  for (int i = 0; i < MAX_DIG; i++)
+  {
+    Serial.print(this_player.myFood[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  Serial.print("digStrength: ");
+  Serial.print(this_player.digStrength);
+  Serial.println();
+  Serial.print("cucumber: ");
+  Serial.print(this_player.cucumber);
+  Serial.println();
+  Serial.print("digAmount: ");
+  Serial.print(this_player.digAmount);
+  Serial.println();
+  Serial.print("ChanceToKnowType: ");
+  for (int i = 0; i < FOOD_TYPE; i++)
+  {
+    Serial.print(this_player.chanceToKnowType[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+}
 // Print the gameboard information for debugging
 void printGameBoard()
 {
@@ -118,12 +145,12 @@ void drawDigitWithBlink(int digit, uint16_t color)
 }
 
 // Draw words on the LED Matrix with an input color
-void drawWord(String word, uint16_t color)
+void drawWord(String word, uint16_t color, int length)
 {
   matrix.setTextWrap(false);
   matrix.setTextSize(1);
   matrix.setTextColor(color);
-  for (int8_t x = 7; x >= -36; x--)
+  for (int x = 7; x >= (-7 * length); x--)
   {
     matrix.clear();
     matrix.setCursor(x, 0);
@@ -151,6 +178,7 @@ void drawSadFace()
   delay(1000);
 }
 
+// Draw a digit with a progress bar
 void drawProgressBar(int num)
 {
   for (int x = 7; x >= 0; x--)
@@ -218,13 +246,14 @@ void setup()
 
 void loop()
 {
+  // Display Digging Strength
   drawDigit(this_player.digStrength, LED_YELLOW);
 
   // Start this player's turn
   if (boardPlaying.myTurn == 1)
   {
-    String action;
     // Choose an action
+    String action;
     while (action == NULL)
     {
       String cardRead;
@@ -244,10 +273,11 @@ void loop()
         action = cardRead;
       }
     }
-    // Detect
+
+    // Detect Action
     if (action == this_player.detect_uid)
     {
-      drawWord("Detect", LED_GREEN);
+      drawWord("Detect", LED_GREEN, 6);
       bool stopDetect = true;
       while (stopDetect)
       {
@@ -261,87 +291,147 @@ void loop()
           continue;
         }
         detectingSpot = uidToString();
+        // Loop to see which spot is detected
         for (int i = 0; i < NUM_SPOTS; i++)
         {
           if (detectingSpot == this_player.board[i])
           {
             drawProgressBar(boardPlaying.level[i]);
-            Serial.println(boardPlaying.level[i]);
             // Roll a 6 sided dice to have the chance to know food type
-            for (int i = 0; i < 30; i++)
+            for (int j = 0; j < 30; j++)
             {
               drawDigit(random(1, 7), LED_RED);
               delay(60);
             }
             int chance = random(1, 7);
+            int foodID = boardPlaying.food[i];
             // Display the result of rolling and print the food when success
-            if (chance <= this_player.chanceToKnowType[boardPlaying.level[i]])
+            if (chance <= this_player.chanceToKnowType[foodID])
             {
               drawDigitWithBlink(chance, LED_GREEN);
+              drawWord(foodName[foodID], LED_YELLOW, foodName[foodID].length());
             }
             else
             {
               drawDigitWithBlink(chance, LED_RED);
             }
             stopDetect = false;
-            boardPlaying.myTurn = 0;
           }
         }
       }
+      // boardPlaying.myTurn = 0;
     }
-    // Collect digging Strength
+
+    // Collect digging Strength Ation
     else if (action == this_player.collect_uid)
     {
       if (this_player.digStrength < 3)
       {
         this_player.digStrength += 1;
         drawSmileFace();
-        boardPlaying.myTurn = 0;
+        // boardPlaying.myTurn = 0;
       }
       else
       {
         drawSadFace();
       }
     }
+
+    // Dig Action
     else if (action == this_player.dig_uid)
     {
-      matrix.setTextWrap(false);
-      matrix.setTextSize(1);
-      matrix.setTextColor(LED_GREEN);
-      for (int8_t x = 7; x >= -36; x--)
+      drawWord("Dig", LED_GREEN, 3);
+      bool stopDig = true;
+      while (stopDig)
       {
-        matrix.clear();
-        matrix.setCursor(x, 0);
-        matrix.print("Dig");
-        matrix.writeDisplay();
-        delay(100);
-      }
-      while (true)
-      {
-        // Look for new cards
-        String detectingSpot;
+        String digSpot;
         if (!mfrc522.PICC_IsNewCardPresent())
         {
           continue;
         }
-        // Select one of the cards
         if (!mfrc522.PICC_ReadCardSerial())
         {
           continue;
         }
-        detectingSpot = uidToString();
+        digSpot = uidToString();
+        // Loop to see which spot is digged
         for (int i = 0; i < NUM_SPOTS; i++)
         {
-          if (detectingSpot == this_player.board[i])
+          if (digSpot == this_player.board[i])
           {
-            matrix.clear();
-            matrix.drawLine(0, 0, 7, 7, LED_RED);
-            matrix.drawLine(0, 7, 7, 0, LED_RED);
-            matrix.writeDisplay();
-            delay(500);
+            // Decide whether player performed a successful dig
+            if (boardPlaying.level[i] == this_player.digStrength)
+            {
+              int foodID = boardPlaying.food[i];
+              // Deduct the required digging strength
+              this_player.digStrength -= boardPlaying.level[i];
+              // Store the food digged
+              this_player.myFood[this_player.digAmount] = foodID;
+              // Increase the change of knowing the food when detect
+              if (this_player.chanceToKnowType[foodID] < 3)
+              {
+                if (foodID >= 0 && foodID < 4)
+                {
+                  for (int k = 0; k < 4; k++)
+                  {
+                    this_player.chanceToKnowType[k] += 1;
+                  }
+                }
+                else if (foodID == 4 || foodID == 5)
+                {
+                  this_player.chanceToKnowType[4] += 1;
+                  this_player.chanceToKnowType[5] += 1;
+                }
+                else if (foodID == 6 || foodID == 7)
+                {
+                  this_player.chanceToKnowType[6] += 1;
+                  this_player.chanceToKnowType[7] += 1;
+                }
+                else
+                {
+                  this_player.chanceToKnowType[8] += 1;
+                }
+              }
+              // Refill a different food on a different level at the spot digged
+              bool fillFood = true;
+              while (fillFood)
+              {
+                int tempFood = random(FOOD_TYPE);
+                int tempLevel = random(1, ALL_LEVELS + 1);
+                if (tempLevel != boardPlaying.level[i] && boardPlaying.totalFoodAmount[tempFood] > 0)
+                {
+                  boardPlaying.totalFoodAmount[boardPlaying.food[i]] -= 1;
+                  boardPlaying.food[i] = tempFood;
+                  boardPlaying.level[i] = tempLevel;
+                  fillFood = false;
+                }
+              }
+              drawSmileFace();
+            }
+            else
+            {
+              this_player.digStrength = 0;
+              drawSadFace();
+            }
+
+            // Increase player's total digging amount
+            if (this_player.digAmount < MAX_DIG - 1)
+            {
+              this_player.digAmount++;
+            }
+            else
+            {
+              // End the game when a player used 15 dig actions
+              boardPlaying.endGame = 1;
+            }
+            Serial.println();
+            printGameBoard();
+            printPlayer();
+            stopDig = false;
           }
         }
       }
+      // boardPlaying.myTurn = 0;
     }
   }
 }

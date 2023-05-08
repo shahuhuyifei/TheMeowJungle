@@ -39,7 +39,7 @@ struct player
   int myFood[MAX_DIG];     // Store the food that a player owns
   int digStrength;
   int cucumber;                    // Store the number of cucumbers a player owns
-  int digAmount;                   // Amount of digging actions left
+  int digAmount;                   // Amount of digging actions used
   int chanceToKnowType[FOOD_TYPE]; // The chance to know the food type by rolling a digital dice after detect
   uint8_t my_mac[6];               // mac address of the current player
   uint8_t peer_mac[6];             // mac address of the next player
@@ -82,7 +82,7 @@ player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", 
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
-                   MAX_DIG,
+                   0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0},
                    {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C}};
@@ -97,7 +97,7 @@ player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", 
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
-                   MAX_DIG,
+                   0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C},
                    {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48}};
@@ -112,7 +112,7 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
                    {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
-                   MAX_DIG,
+                   0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48},
                    {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0}};
@@ -133,6 +133,8 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
   ------------------------------------------------
 */
 int initialFoodAmount[FOOD_TYPE] = {3, 5, 6, 6, 6, 7, 7, 8, 6};
+String foodName[FOOD_TYPE] = {"Chicken Dry Food", "Canned Chicken", "Freeze-dried Chicken", "Chicken Creamy Treat",
+                              "Canned Beef", "Beef Dry Food", "Seafood Dry Food", "Canned Seafood", "Cucumber"};
 
 static const uint8_t PROGMEM
     smile_bmp[] =
