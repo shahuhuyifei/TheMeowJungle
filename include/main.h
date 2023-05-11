@@ -53,9 +53,10 @@ struct gameBoard
   int totalFoodAmount[FOOD_TYPE]; // Amount of each type of food left in the pool
   int myTurn;                     // 0 - not this player's turn, 1 - this player's turn
   int endGame;                    // 0 - game is not ending, 1 - game is ending after one more round
+  int playerCucumber[3];          // Cucumbers each player own. 0 - Play A, 1 - Player B, 2 - Player C
 
   // A function to initialise the values of a gameboard
-  void initValues(int *levels, int *foods, int *totalFoodAmounts, int initMyTurn, int initEndGame)
+  void initValues(int *levels, int *foods, int *totalFoodAmounts, int initMyTurn, int initEndGame, int *initPlayerCucumber)
   {
     for (int i = 0; i < NUM_SPOTS; i++)
     {
@@ -68,6 +69,10 @@ struct gameBoard
     }
     myTurn = initMyTurn;
     endGame = initEndGame;
+    for (int i = 0; i < 3; i++)
+    {
+      playerCucumber[i] = initPlayerCucumber[i];
+    }
   }
 };
 
@@ -136,6 +141,7 @@ int initialFoodAmount[FOOD_TYPE] = {3, 5, 6, 6, 6, 7, 7, 8, 6};
 String foodName[FOOD_TYPE] = {"Chicken Dry Food", "Canned Chicken", "Freeze-dried Chicken", "Chicken Creamy Treat",
                               "Canned Beef", "Beef Dry Food", "Seafood Dry Food", "Canned Seafood", "Cucumber"};
 
+// LED Matrix graphics
 static const uint8_t PROGMEM
     smile_bmp[] =
         {B00111100,

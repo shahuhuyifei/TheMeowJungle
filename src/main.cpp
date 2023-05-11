@@ -72,6 +72,14 @@ void printGameBoard()
   Serial.println(boardPlaying.myTurn);
   Serial.print("endGame: ");
   Serial.println(boardPlaying.endGame);
+  Serial.print("playerCucumber: ");
+  for (int i = 0; i < 3; i++)
+  {
+    Serial.print(boardPlaying.playerCucumber[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+  Serial.println();
 }
 
 // Identify the player and initialize the gameboard at player A
@@ -103,7 +111,8 @@ void identifyPlayer(String playerIdentifier)
       }
     }
     // Initialize the board
-    boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0);
+    int initPlayerCucumber[3] = {0, 0, 0};
+    boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0, initPlayerCucumber);
   }
   else if (playerIdentifier = "B")
   {
@@ -392,7 +401,44 @@ void loop()
                   this_player.chanceToKnowType[8] += 1;
                 }
               }
-              // Refill a different food on a different level at the spot digged
+              // Throw cucumber to other players
+              if (foodID == 8)
+              {
+                drawWord("Cucumber Time!", LED_YELLOW, 14);
+                bool stopFindPlayer = true;
+                while (stopFindPlayer)
+                {
+                  String playerID;
+                  if (!mfrc522.PICC_IsNewCardPresent())
+                  {
+                    continue;
+                  }
+                  if (!mfrc522.PICC_ReadCardSerial())
+                  {
+                    continue;
+                  }
+                  playerID = uidToString();
+                  if (playerID == this_player.player_A_uid)
+                  {
+                    boardPlaying.playerCucumber[0]++;
+                    drawWord("Player A - 2", LED_GREEN, 12);
+                    stopFindPlayer = false;
+                  }
+                  if (playerID == this_player.player_B_uid)
+                  {
+                    boardPlaying.playerCucumber[1]++;
+                    drawWord("Player B - 2", LED_GREEN, 12);
+                    stopFindPlayer = false;
+                  }
+                  if (playerID == this_player.player_C_uid)
+                  {
+                    boardPlaying.playerCucumber[1]++;
+                    drawWord("Player C - 2", LED_GREEN, 12);
+                    stopFindPlayer = false;
+                  }
+                }
+              }
+              // Refill a food on a different level at the spot digged
               bool fillFood = true;
               while (fillFood)
               {
@@ -407,6 +453,10 @@ void loop()
                 }
               }
               drawSmileFace();
+              if (foodID != 8)
+              {
+                drawWord(foodName[foodID], LED_YELLOW, foodName[foodID].length());
+              }
             }
             else
             {
