@@ -43,6 +43,7 @@ struct player
   int chanceToKnowType[FOOD_TYPE]; // The chance to know the food type by rolling a digital dice after detect
   uint8_t my_mac[6];               // mac address of the current player
   uint8_t peer_mac[6];             // mac address of the next player
+  int myTurn;                      // 0 - not this player's turn, 1 - this player's turn
 };
 
 // Create a struct for the game board information to share between players
@@ -51,12 +52,11 @@ struct gameBoard
   int level[NUM_SPOTS];           // Depth of food at each spot
   int food[NUM_SPOTS];            // Type of food at each spot
   int totalFoodAmount[FOOD_TYPE]; // Amount of each type of food left in the pool
-  int myTurn;                     // 0 - not this player's turn, 1 - this player's turn
   int endGame;                    // 0 - game is not ending, 1 - game is ending after one more round
   int playerCucumber[3];          // Cucumbers each player own. 0 - Play A, 1 - Player B, 2 - Player C
 
   // A function to initialise the values of a gameboard
-  void initValues(int *levels, int *foods, int *totalFoodAmounts, int initMyTurn, int initEndGame, int *initPlayerCucumber)
+  void initValues(int *levels, int *foods, int *totalFoodAmounts, int initEndGame, int *initPlayerCucumber)
   {
     for (int i = 0; i < NUM_SPOTS; i++)
     {
@@ -67,7 +67,6 @@ struct gameBoard
     {
       totalFoodAmount[i] = totalFoodAmounts[i];
     }
-    myTurn = initMyTurn;
     endGame = initEndGame;
     for (int i = 0; i < 3; i++)
     {
@@ -90,7 +89,8 @@ player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", 
                    0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0},
-                   {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C}};
+                   {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C},
+                   1};
 
 player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", "53 58 53 42", "93 D2 53 42", "B3 31 59 42", "63 B2 58 42", "43 32 58 42"},
                    "F0 79 29 4A",
@@ -105,7 +105,8 @@ player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", 
                    0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0x3C, 0x61, 0x05, 0x4B, 0x05, 0x6C},
-                   {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48}};
+                   {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48},
+                   0};
 
 player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", "A3 BC 55 42", "A3 C2 55 42", "C3 35 56 42", "93 B3 56 42", "93 B9 56 42"},
                    "40 7A 29 4A",
@@ -120,7 +121,8 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
                    0,
                    {1, 1, 1, 1, 1, 1, 1, 1, 1},
                    {0x94, 0xB5, 0x55, 0x6B, 0x25, 0x48},
-                   {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0}};
+                   {0xE8, 0x31, 0xCD, 0x63, 0x5F, 0xD0},
+                   0};
 
 /*
   Code and amount for food treasures

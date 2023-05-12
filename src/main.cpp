@@ -43,6 +43,9 @@ void printPlayer()
     Serial.print(" ");
   }
   Serial.println();
+  Serial.print("Myturn: ");
+  Serial.print(this_player.myTurn);
+  Serial.println();
 }
 // Print the gameboard information for debugging
 void printGameBoard()
@@ -68,8 +71,6 @@ void printGameBoard()
     Serial.print(" ");
   }
   Serial.println();
-  Serial.print("Myturn: ");
-  Serial.println(boardPlaying.myTurn);
   Serial.print("endGame: ");
   Serial.println(boardPlaying.endGame);
   Serial.print("playerCucumber: ");
@@ -85,7 +86,7 @@ void printGameBoard()
 // Identify the player and initialize the gameboard at player A
 void identifyPlayer(String playerIdentifier)
 {
-  if (playerIdentifier = "A")
+  if (playerIdentifier == "A")
   {
     this_player = player_A;
     // Generate initial levels
@@ -112,13 +113,13 @@ void identifyPlayer(String playerIdentifier)
     }
     // Initialize the board
     int initPlayerCucumber[3] = {0, 0, 0};
-    boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 1, 0, initPlayerCucumber);
+    boardPlaying.initValues(initialLevel, initialFood, initialFoodAmount, 0, initPlayerCucumber);
   }
-  else if (playerIdentifier = "B")
+  else if (playerIdentifier == "B")
   {
     this_player = player_B;
   }
-  else if (playerIdentifier = "C")
+  else if (playerIdentifier == "C")
   {
     this_player = player_C;
   }
@@ -229,6 +230,15 @@ void drawProgressBar(int num)
     }
   }
 }
+// Receive gameboard information from the other board
+void onRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len)
+{
+  memcpy(&boardPlaying, data, sizeof(boardPlaying));
+  this_player.myTurn = 1;
+  printGameBoard();
+  Serial.print("Bytes received: ");
+  Serial.println(data_len);
+}
 
 void setup()
 {
@@ -246,7 +256,7 @@ void setup()
   WiFi.disconnect();
   ESPNow.init();
   ESPNow.add_peer(this_player.peer_mac);
-  // ESPNow.reg_recv_cb(onRecv);
+  ESPNow.reg_recv_cb(onRecv);
 
   matrix.begin(0x70);
 
@@ -259,8 +269,13 @@ void loop()
   drawDigit(this_player.digStrength, LED_YELLOW);
 
   // Start this player's turn
-  if (boardPlaying.myTurn == 1)
+  if (this_player.myTurn == 1)
   {
+    matrix.clear();
+    matrix.drawRect(0, 0, 8, 8, LED_RED);
+    matrix.fillRect(2, 2, 4, 4, LED_GREEN);
+    matrix.writeDisplay(); // write the changes we just made to the display
+    delay(500);
     // Choose an action
     String action;
     while (action == NULL)
@@ -328,7 +343,8 @@ void loop()
           }
         }
       }
-      // boardPlaying.myTurn = 0;
+      this_player.myTurn = 0;
+      ESPNow.send_message(this_player.peer_mac, (uint8_t *)&boardPlaying, sizeof(boardPlaying));
     }
 
     // Collect digging Strength Ation
@@ -338,7 +354,8 @@ void loop()
       {
         this_player.digStrength += 1;
         drawSmileFace();
-        // boardPlaying.myTurn = 0;
+        this_player.myTurn = 0;
+        ESPNow.send_message(this_player.peer_mac, (uint8_t *)&boardPlaying, sizeof(boardPlaying));
       }
       else
       {
@@ -481,7 +498,8 @@ void loop()
           }
         }
       }
-      // boardPlaying.myTurn = 0;
+      this_player.myTurn = 0;
+      ESPNow.send_message(this_player.peer_mac, (uint8_t *)&boardPlaying, sizeof(boardPlaying));
     }
   }
 }
