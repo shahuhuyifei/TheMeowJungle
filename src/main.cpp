@@ -2,6 +2,7 @@
 
 player this_player;     // Store the current player's information
 gameBoard boardPlaying; // Store the current gameboard information
+int finalScore = 0;     // Store the final score
 
 // Convert uid to a string
 String uidToString()
@@ -213,7 +214,6 @@ void drawProgressBar(int num)
       matrix.setCursor(1, 1);
       matrix.print(num);
       matrix.writeDisplay();
-      matrix.writeDisplay();
       delay(500);
     }
     else
@@ -225,16 +225,207 @@ void drawProgressBar(int num)
       matrix.setCursor(1, 1);
       matrix.print(num);
       matrix.writeDisplay();
-      matrix.writeDisplay();
       delay(500);
     }
   }
 }
+
+// Find if a combo of two food exist
+void findComboOfTwoFood(int foodOne, int foodTwo, int score)
+{
+  int combo[2] = {9, 9};
+  bool findingCombo = true;
+  while (findingCombo)
+  {
+    // Find the combo and note the position of the food ID
+    for (int i = 0; i < MAX_DIG; i++)
+    {
+      if (this_player.myFood[i] == foodOne)
+      {
+        combo[0] == i;
+      }
+      else if (this_player.myFood[i] == foodTwo)
+      {
+        combo[1] == i;
+      }
+    }
+    // Check if a combo exist
+    for (int i = 0; i < 2; i++)
+    {
+      if (combo[i] == 9)
+      {
+        findingCombo = false;
+      }
+    }
+    if (findingCombo == true)
+    {
+      finalScore += score;
+      // Reset the value of calculated food in player's food list and temporary value
+      for (int i = 0; i < 2; i++)
+      {
+        this_player.myFood[combo[i]] = 9;
+        combo[i] = 9;
+      }
+    }
+  }
+}
+
+// Play the last turn and calculate the scores
+void lastTurnAndCalculateScores()
+{
+  // Start calculating scores when players played their last turns
+  if (boardPlaying.endGame == 1)
+  {
+    ESPNow.send_message(this_player.peer_mac, (uint8_t *)&boardPlaying, sizeof(boardPlaying));
+    int comboOne[4] = {9, 9, 9, 9};
+    bool findingComboOne = true;
+    while (findingComboOne)
+    {
+      // Find the combo and note the position of the food ID
+      for (int i = 0; i < MAX_DIG; i++)
+      {
+        if (this_player.myFood[i] == 0)
+        {
+          comboOne[0] == i;
+        }
+        else if (this_player.myFood[i] == 1)
+        {
+          comboOne[1] == i;
+        }
+        else if (this_player.myFood[i] == 2)
+        {
+          comboOne[2] == i;
+        }
+        else if (this_player.myFood[i] == 3)
+        {
+          comboOne[3] == i;
+        }
+      }
+      // Check if a combo exist
+      for (int i = 0; i < 4; i++)
+      {
+        if (comboOne[i] == 9)
+        {
+          findingComboOne = false;
+        }
+      }
+      if (findingComboOne == true)
+      {
+        finalScore += 20;
+        // Reset the value of calculated food in player's food list and temporary value
+        for (int i = 0; i < 4; i++)
+        {
+          this_player.myFood[comboOne[i]] = 9;
+          comboOne[i] = 9;
+        }
+      }
+    }
+
+    int comboTwo[3] = {9, 9, 9};
+    bool findingComboTwo = true;
+    while (findingComboTwo)
+    {
+      // Find the combo and note the position of the food ID
+      for (int i = 0; i < MAX_DIG; i++)
+      {
+        if (this_player.myFood[i] == 0)
+        {
+          comboTwo[0] == i;
+        }
+        else if (this_player.myFood[i] == 1)
+        {
+          comboTwo[1] == i;
+        }
+        else if (this_player.myFood[i] == 2)
+        {
+          comboTwo[2] == i;
+        }
+      }
+      // Check if a combo exist
+      for (int i = 0; i < 3; i++)
+      {
+        if (comboTwo[i] == 9)
+        {
+          findingComboTwo = false;
+        }
+      }
+      if (findingComboTwo == true)
+      {
+        finalScore += 12;
+        // Reset the value of calculated food in player's food list and temporary value
+        for (int i = 0; i < 3; i++)
+        {
+          this_player.myFood[comboTwo[i]] = 9;
+          comboTwo[i] = 9;
+        }
+      }
+    }
+
+    findComboOfTwoFood(1, 3, 7);
+    findComboOfTwoFood(4, 3, 6);
+    findComboOfTwoFood(5, 3, 6);
+    findComboOfTwoFood(6, 3, 6);
+    findComboOfTwoFood(7, 3, 6);
+
+    // Add the individual food scores
+    for (int i = 0; i < MAX_DIG; i++)
+    {
+      int foodID = this_player.myFood[i];
+      if (foodID == 0)
+      {
+        finalScore += 5;
+      }
+      else if (foodID == 1 || foodID == 2 || foodID == 3)
+      {
+        finalScore += 3;
+      }
+      else if (foodID == 4 || foodID == 5 || foodID == 6 || foodID == 7)
+      {
+        finalScore += 2;
+      }
+    }
+
+    // Deduct the cucumber score
+    finalScore -= 2 * this_player.cucumber;
+
+    // Draw the final score on the LED matrix
+    while (true)
+    {
+      drawWord(String(finalScore), LED_GREEN, 2);
+    }
+  }
+
+  // Counting down for players play their last turns
+  if (this_player.myTurn == 1 && (boardPlaying.endGame == 3 || boardPlaying.endGame == 2))
+  {
+    drawWord("Last Round!", LED_RED, 11);
+    boardPlaying.endGame--;
+  }
+}
+
 // Receive gameboard information from the other board
 void onRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len)
 {
   memcpy(&boardPlaying, data, sizeof(boardPlaying));
-  this_player.myTurn = 1;
+  if (boardPlaying.endGame != 1)
+  {
+    this_player.myTurn = 1;
+  }
+
+  // Record the cucumber that the current player owns
+  if (CURRENT_PLAYER == "A")
+  {
+    this_player.cucumber = boardPlaying.playerCucumber[0];
+  }
+  else if (CURRENT_PLAYER == "B")
+  {
+    this_player.cucumber = boardPlaying.playerCucumber[1];
+  }
+  else if (CURRENT_PLAYER == "C")
+  {
+    this_player.cucumber = boardPlaying.playerCucumber[2];
+  }
+
   printGameBoard();
   Serial.print("Bytes received: ");
   Serial.println(data_len);
@@ -268,14 +459,25 @@ void loop()
   // Display Digging Strength
   drawDigit(this_player.digStrength, LED_YELLOW);
 
+  lastTurnAndCalculateScores();
+
   // Start this player's turn
   if (this_player.myTurn == 1)
   {
+    // Draw a graphic to remind players to start their turn
     matrix.clear();
     matrix.drawRect(0, 0, 8, 8, LED_RED);
-    matrix.fillRect(2, 2, 4, 4, LED_GREEN);
-    matrix.writeDisplay(); // write the changes we just made to the display
-    delay(500);
+    delay(200);
+    matrix.writeDisplay();
+    matrix.drawRect(1, 1, 6, 6, LED_GREEN);
+    delay(200);
+    matrix.writeDisplay();
+    matrix.drawRect(2, 2, 4, 4, LED_YELLOW);
+    delay(200);
+    matrix.writeDisplay();
+    matrix.drawRect(3, 3, 2, 2, LED_GREEN);
+    delay(200);
+    matrix.writeDisplay();
     // Choose an action
     String action;
     while (action == NULL)
@@ -423,6 +625,7 @@ void loop()
               {
                 drawWord("Cucumber Time!", LED_YELLOW, 14);
                 bool stopFindPlayer = true;
+                // Look for player ID
                 while (stopFindPlayer)
                 {
                   String playerID;
@@ -449,7 +652,7 @@ void loop()
                   }
                   if (playerID == this_player.player_C_uid)
                   {
-                    boardPlaying.playerCucumber[1]++;
+                    boardPlaying.playerCucumber[2]++;
                     drawWord("Player C - 2", LED_GREEN, 12);
                     stopFindPlayer = false;
                   }
@@ -470,6 +673,7 @@ void loop()
                 }
               }
               drawSmileFace();
+              // Draw the food name when it is not cucumber
               if (foodID != 8)
               {
                 drawWord(foodName[foodID], LED_YELLOW, foodName[foodID].length());
@@ -480,16 +684,12 @@ void loop()
               this_player.digStrength = 0;
               drawSadFace();
             }
-
             // Increase player's total digging amount
-            if (this_player.digAmount < MAX_DIG - 1)
+            this_player.digAmount++;
+            // End the game when a player used 15 dig actions
+            if (this_player.digAmount == MAX_DIG && boardPlaying.endGame == 0)
             {
-              this_player.digAmount++;
-            }
-            else
-            {
-              // End the game when a player used 15 dig actions
-              boardPlaying.endGame = 1;
+              boardPlaying.endGame = 3;
             }
             Serial.println();
             printGameBoard();

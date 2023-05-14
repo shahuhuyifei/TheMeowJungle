@@ -52,7 +52,7 @@ struct gameBoard
   int level[NUM_SPOTS];           // Depth of food at each spot
   int food[NUM_SPOTS];            // Type of food at each spot
   int totalFoodAmount[FOOD_TYPE]; // Amount of each type of food left in the pool
-  int endGame;                    // 0 - game is not ending, 1 - game is ending after one more round
+  int endGame;                    // 0 - game is not ending, 3 - game is ending after two more turns, 2 - game is ending after this turn, 1 - start calculating points
   int playerCucumber[3];          // Cucumbers each player own. 0 - Play A, 1 - Player B, 2 - Player C
 
   // A function to initialise the values of a gameboard
