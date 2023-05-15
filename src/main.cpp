@@ -233,7 +233,7 @@ void drawProgressBar(int num)
 // Find if a combo of two food exist
 void findComboOfTwoFood(int foodOne, int foodTwo, int score)
 {
-  int combo[2] = {9, 9};
+  int combo[2] = {MAX_DIG, MAX_DIG};
   bool findingCombo = true;
   while (findingCombo)
   {
@@ -242,17 +242,17 @@ void findComboOfTwoFood(int foodOne, int foodTwo, int score)
     {
       if (this_player.myFood[i] == foodOne)
       {
-        combo[0] == i;
+        combo[0] = i;
       }
       else if (this_player.myFood[i] == foodTwo)
       {
-        combo[1] == i;
+        combo[1] = i;
       }
     }
     // Check if a combo exist
     for (int i = 0; i < 2; i++)
     {
-      if (combo[i] == 9)
+      if (combo[i] == MAX_DIG)
       {
         findingCombo = false;
       }
@@ -263,8 +263,8 @@ void findComboOfTwoFood(int foodOne, int foodTwo, int score)
       // Reset the value of calculated food in player's food list and temporary value
       for (int i = 0; i < 2; i++)
       {
-        this_player.myFood[combo[i]] = 9;
-        combo[i] = 9;
+        this_player.myFood[combo[i]] = MAX_DIG;
+        combo[i] = MAX_DIG;
       }
     }
   }
@@ -277,7 +277,7 @@ void lastTurnAndCalculateScores()
   if (boardPlaying.endGame == 1)
   {
     ESPNow.send_message(this_player.peer_mac, (uint8_t *)&boardPlaying, sizeof(boardPlaying));
-    int comboOne[4] = {9, 9, 9, 9};
+    int comboOne[4] = {MAX_DIG, MAX_DIG, MAX_DIG, MAX_DIG};
     bool findingComboOne = true;
     while (findingComboOne)
     {
@@ -286,25 +286,25 @@ void lastTurnAndCalculateScores()
       {
         if (this_player.myFood[i] == 0)
         {
-          comboOne[0] == i;
+          comboOne[0] = i;
         }
         else if (this_player.myFood[i] == 1)
         {
-          comboOne[1] == i;
+          comboOne[1] = i;
         }
         else if (this_player.myFood[i] == 2)
         {
-          comboOne[2] == i;
+          comboOne[2] = i;
         }
         else if (this_player.myFood[i] == 3)
         {
-          comboOne[3] == i;
+          comboOne[3] = i;
         }
       }
       // Check if a combo exist
       for (int i = 0; i < 4; i++)
       {
-        if (comboOne[i] == 9)
+        if (comboOne[i] == MAX_DIG)
         {
           findingComboOne = false;
         }
@@ -315,13 +315,13 @@ void lastTurnAndCalculateScores()
         // Reset the value of calculated food in player's food list and temporary value
         for (int i = 0; i < 4; i++)
         {
-          this_player.myFood[comboOne[i]] = 9;
-          comboOne[i] = 9;
+          this_player.myFood[comboOne[i]] = MAX_DIG;
+          comboOne[i] = MAX_DIG;
         }
       }
     }
 
-    int comboTwo[3] = {9, 9, 9};
+    int comboTwo[3] = {MAX_DIG, MAX_DIG, MAX_DIG};
     bool findingComboTwo = true;
     while (findingComboTwo)
     {
@@ -330,21 +330,21 @@ void lastTurnAndCalculateScores()
       {
         if (this_player.myFood[i] == 0)
         {
-          comboTwo[0] == i;
+          comboTwo[0] = i;
         }
         else if (this_player.myFood[i] == 1)
         {
-          comboTwo[1] == i;
+          comboTwo[1] = i;
         }
         else if (this_player.myFood[i] == 2)
         {
-          comboTwo[2] == i;
+          comboTwo[2] = i;
         }
       }
       // Check if a combo exist
       for (int i = 0; i < 3; i++)
       {
-        if (comboTwo[i] == 9)
+        if (comboTwo[i] == MAX_DIG)
         {
           findingComboTwo = false;
         }
@@ -355,8 +355,8 @@ void lastTurnAndCalculateScores()
         // Reset the value of calculated food in player's food list and temporary value
         for (int i = 0; i < 3; i++)
         {
-          this_player.myFood[comboTwo[i]] = 9;
-          comboTwo[i] = 9;
+          this_player.myFood[comboTwo[i]] = MAX_DIG;
+          comboTwo[i] = MAX_DIG;
         }
       }
     }
@@ -478,6 +478,7 @@ void loop()
     matrix.drawRect(3, 3, 2, 2, LED_GREEN);
     delay(200);
     matrix.writeDisplay();
+
     // Choose an action
     String action;
     while (action == NULL)
@@ -686,7 +687,7 @@ void loop()
             }
             // Increase player's total digging amount
             this_player.digAmount++;
-            // End the game when a player used 15 dig actions
+            // End the game when a player used MAX_DIG dig actions
             if (this_player.digAmount == MAX_DIG && boardPlaying.endGame == 0)
             {
               boardPlaying.endGame = 3;
