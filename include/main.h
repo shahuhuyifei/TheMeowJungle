@@ -24,7 +24,7 @@ Adafruit_BicolorMatrix matrix = Adafruit_BicolorMatrix();
 #define MAX_DIG 15         // Maximum number of digging action a player can perform
 #define FOOD_TYPE 9        // Total number of food types
 #define ALL_LEVELS 3       // Total number of levels of each spot
-#define CURRENT_PLAYER "A" // Define a constant to identify the current player
+#define CURRENT_PLAYER "A" // Define a constant to identify the current player (A || b || C)
 
 // Create a struct for all players to store their information
 struct player
@@ -131,7 +131,7 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
   | Chicken Flavour Dry Food     |   0  |    3   |
   | Canned Chicken               |   1  |    5   |
   | Freeze-dried Chicken         |   2  |    6   |
-  | Chicken Flavour Creamy Treat |   3  |    6   |
+  | Chicken Puree Treat          |   3  |    6   |
   | Canned Beef                  |   4  |    6   |
   | Beef Flavour Dry Food        |   5  |    7   |
   | Seafood Flavour Dry Food     |   6  |    7   |
@@ -140,7 +140,7 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
   ------------------------------------------------
 */
 int initialFoodAmount[FOOD_TYPE] = {3, 5, 6, 6, 6, 7, 7, 8, 6};
-String foodName[FOOD_TYPE] = {"Chicken Dry Food", "Canned Chicken", "Freeze-dried Chicken", "Chicken Creamy Treat",
+String foodName[FOOD_TYPE] = {"Chicken Dry Food", "Canned Chicken", "Freeze-dried Chicken", "Chicken Puree Treat",
                               "Canned Beef", "Beef Dry Food", "Seafood Dry Food", "Canned Seafood", "Cucumber"};
 
 // LED Matrix graphics
