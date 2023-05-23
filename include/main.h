@@ -77,9 +77,9 @@ struct gameBoard
 
 // Create initial properties for each player
 player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", "D3 AF 51 42", "23 1E 52 42", "73 87 52 42", "93 EB 52 42", "93 F0 52 42"},
-                   "00 7B 29 4A",
-                   "10 7B 29 4A",
-                   "20 7B 29 4A",
+                   "63 2C 58 42",
+                   "13 B1 57 42",
+                   "A3 36 57 42",
                    "",
                    "30 7B 29 4A",
                    "40 7B 29 4A",
