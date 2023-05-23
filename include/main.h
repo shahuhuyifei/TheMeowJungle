@@ -21,10 +21,10 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 Adafruit_BicolorMatrix matrix = Adafruit_BicolorMatrix();
 
 #define NUM_SPOTS 9        // Total number of food spots on the map
-#define MAX_DIG 15         // Maximum number of digging action a player can perform
+#define MAX_DIG 3          // Maximum number of digging action a player can perform
 #define FOOD_TYPE 9        // Total number of food types
 #define ALL_LEVELS 3       // Total number of levels of each spot
-#define CURRENT_PLAYER "A" // Define a constant to identify the current player (A || b || C)
+#define CURRENT_PLAYER "C" // Define a constant to identify the current player (A || b || C)
 
 // Create a struct for all players to store their information
 struct player
@@ -83,7 +83,8 @@ player player_A = {{"63 3A 51 42", "73 32 5B 42", "E3 BD 5A 42", "D3 A9 51 42", 
                    "",
                    "30 7B 29 4A",
                    "40 7B 29 4A",
-                   {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+                   {9, 9, 9},
+                   //  {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
                    0,
@@ -99,7 +100,8 @@ player player_B = {{"F3 B8 5A 42", "33 3C 5A 42", "63 B9 59 42", "A3 37 59 42", 
                    "20 7A 29 4A",
                    "",
                    "30 7A 29 4A",
-                   {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+                   {9, 9, 9},
+                   //  {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
                    0,
@@ -115,7 +117,8 @@ player player_C = {{"E3 41 54 42", "E3 47 54 42", "83 C8 54 42", "C3 39 55 42", 
                    "70 7A 29 4A",
                    "80 7A 29 4A",
                    "",
-                   {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+                   {9, 9, 9},
+                   //  {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
                    0,
                    0,
                    0,
