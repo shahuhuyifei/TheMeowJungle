@@ -2,7 +2,7 @@
 ![Labelled Diagram](figures/Labelled%20Diagram.jpg)
 ![Labelled Food Detector and RFID Tags](figures/Labelled%20food%20detector%20and%20RFID%20tags.jpg)
 
-In The Meow Jungle, each player acts as a food hunter for the king of the Meow Jungle, named Peppercorn Cat. There are nine food spots on the gameboard (the jungle map). Each spot has three levels of depth. Different foods are generated at one of the levels of each spot, but the precise location of the food is hidden from the players. The objective of the game is to score the highest number of total food points. Points can be earned by finding food on the map and trying to get the best combination according to the menu (refer to Figure 1). Players must perform one (and only one) of the three actions on their turn. The three actions are Detect, Gain Strength, and Dig.
+In The Meow Jungle, each player acts as a food hunter for the king of the Meow Jungle, named Peppercorn Cat. There are nine food spots on the gameboard (the jungle map). Each spot has three levels of depth. Different foods are generated at one of the levels of each spot, but the precise location of the food is hidden from the players. The objective of the game is to score the highest number of total food points. Points can be earned by finding food on the map and trying to get the best combination according to the menu. Players must perform one (and only one) of the three actions on their turn. The three actions are Detect, Gain Strength, and Dig.
 
 ![Actions](figures/Actions.jpg)
 
